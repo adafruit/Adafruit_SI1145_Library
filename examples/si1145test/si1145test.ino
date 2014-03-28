@@ -48,4 +48,4 @@ void loop() {
   Serial.print("UV: ");  Serial.println(UVindex);
 
   delay(1000);
-}}
+}

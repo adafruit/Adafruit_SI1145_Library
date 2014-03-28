@@ -1,7 +1,6 @@
 This is a library for the Si1145 UV/IR/Visible Light Sensor
 
-Designed specifically to work with the Si1145 sensor in the
-  adafruit shop
+Designed specifically to work with the Si1145 sensor in the adafruit shop
   ----> https://www.adafruit.com/products/1777
 
   These sensors use I2C to communicate, 2 pins are required to  
@@ -9,7 +8,7 @@ Designed specifically to work with the Si1145 sensor in the
   Adafruit invests time and resources providing this open source code, 
   please support Adafruit and open-source hardware by purchasing 
   products from Adafruit!
-e
+
 Check out the links above for our tutorials and wiring diagrams 
 
 Written by Limor Fried/Ladyada for Adafruit Industries.  
