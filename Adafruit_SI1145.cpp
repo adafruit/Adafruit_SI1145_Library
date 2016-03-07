@@ -27,7 +27,9 @@ boolean Adafruit_SI1145::begin(void) {
  
   uint8_t id = read8(SI1145_REG_PARTID);
   if (id != 0x45) return false; // look for SI1145
+#ifdef DEBUG
   dumpParam();
+#endif
     
   reset();
   
@@ -36,13 +38,13 @@ boolean Adafruit_SI1145::begin(void) {
 #endif
 
     /***********************************/
-  // enable UVindex measurement coefficients!
+  // write UVindex measurement coefficients! Not necessary  these are defaults
   write8(SI1145_REG_UCOEFF0, 0x29);
   write8(SI1145_REG_UCOEFF1, 0x89);
   write8(SI1145_REG_UCOEFF2, 0x02);
   write8(SI1145_REG_UCOEFF3, 0x00);
 
-  // enable UV sensor
+  // enables all sensors: UV, IR, Visible and Proximity
   writeParam(SI1145_PARAM_CHLIST, SI1145_PARAM_CHLIST_ENUV |
   SI1145_PARAM_CHLIST_ENALSIR | SI1145_PARAM_CHLIST_ENALSVIS |
   SI1145_PARAM_CHLIST_ENPS1);
@@ -117,12 +119,11 @@ void Adafruit_SI1145::dumpParam() {
     for (int i=0; i < 0x20 ; i++) {
         Serial.print("Param 0x"); Serial.print(i, HEX);
         Serial.print(" = 0x"); Serial.println(readParam(i), HEX);
-
-        Serial.print("SI1145_REG_UCOEFF0 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF0), HEX);
-        Serial.print("SI1145_REG_UCOEFF1 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF1), HEX);
-        Serial.print("SI1145_REG_UCOEFF2 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF2), HEX);
-        Serial.print("SI1145_REG_UCOEFF3 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF3), HEX);
     }
+    Serial.print("SI1145_REG_UCOEFF0 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF0), HEX);
+    Serial.print("SI1145_REG_UCOEFF1 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF1), HEX);
+    Serial.print("SI1145_REG_UCOEFF2 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF2), HEX);
+    Serial.print("SI1145_REG_UCOEFF3 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF3), HEX);    
 }
 
 //////////////////////////////////////////////////////
