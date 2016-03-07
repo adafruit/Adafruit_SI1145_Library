@@ -27,9 +27,13 @@ boolean Adafruit_SI1145::begin(void) {
  
   uint8_t id = read8(SI1145_REG_PARTID);
   if (id != 0x45) return false; // look for SI1145
-  
+  dumpParam();
+    
   reset();
   
+#ifdef DEBUG
+  dumpParam();
+#endif
 
     /***********************************/
   // enable UVindex measurement coefficients!
@@ -106,6 +110,20 @@ void Adafruit_SI1145::reset() {
   delay(10);
 }
 
+/*****************************************/
+// dumps the parameter registers
+
+void Adafruit_SI1145::dumpParam() {
+    for (int i=0; i < 0x20 ; i++) {
+        Serial.print("Param 0x"); Serial.print(i, HEX);
+        Serial.print(" = 0x"); Serial.println(readParam(i), HEX);
+
+        Serial.print("SI1145_REG_UCOEFF0 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF0), HEX);
+        Serial.print("SI1145_REG_UCOEFF1 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF1), HEX);
+        Serial.print("SI1145_REG_UCOEFF2 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF2), HEX);
+        Serial.print("SI1145_REG_UCOEFF3 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF3), HEX);
+    }
+}
 
 //////////////////////////////////////////////////////
 

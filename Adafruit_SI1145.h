@@ -151,6 +151,7 @@ class Adafruit_SI1145  {
   Adafruit_SI1145(void);
   boolean begin();
   void reset();
+  void dumpParam();
 
   uint16_t readUV();
   uint16_t readIR();
