@@ -110,8 +110,8 @@
 #define SI1145_REG_IRQEN_PS3EVERYSAMPLE 0x10
 
 
-#define SI1145_REG_IRQMODE1 0x05
-#define SI1145_REG_IRQMODE2 0x06
+#define SI1145_REG_IRQMODE1 0x05 // not documented in data sheet
+#define SI1145_REG_IRQMODE2 0x06 // not documented in data sheet
 
 #define SI1145_REG_HWKEY  0x07
 #define SI1145_REG_MEASRATE0 0x08
