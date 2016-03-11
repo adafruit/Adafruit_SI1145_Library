@@ -94,7 +94,7 @@ boolean Adafruit_SI1145::begin(void) {
 /************************/
 
   // measurement rate for auto
-  write8(SI1145_REG_MEASRATE0, 0xFF); // 255 * 31.25uS = 8ms
+  write16(SI1145_REG_MEASRATE0, 0xFF); // 255 * 31.25uS = 8ms
   
   // auto run
   write8(SI1145_REG_COMMAND, SI1145_PSALS_AUTO);
@@ -103,8 +103,7 @@ boolean Adafruit_SI1145::begin(void) {
 }
 
 void Adafruit_SI1145::reset() {
-  write8(SI1145_REG_MEASRATE0, 0);
-  write8(SI1145_REG_MEASRATE1, 0);
+  write16(SI1145_REG_MEASRATE0, 0);
   write8(SI1145_REG_IRQEN, 0);
   write8(SI1145_REG_IRQMODE1, 0); // not documented in data sheet
   write8(SI1145_REG_IRQMODE2, 0); // not documented in data sheet
@@ -122,6 +121,7 @@ void Adafruit_SI1145::reset() {
 // dumps the parameter registers
 
 void Adafruit_SI1145::dumpParam() {
+    Serial.begin(9600);
     for (int i=0; i < 0x20 ; i++) {
         Serial.print("Param 0x"); Serial.print(i, HEX);
         Serial.print(" = 0x"); Serial.println(readParam(i), HEX);
@@ -206,5 +206,21 @@ void Adafruit_SI1145::write8(uint8_t reg, uint8_t val) {
   Wire.beginTransmission(_addr); // start transmission to device 
   Wire.write(reg); // sends register address to write
   Wire.write(val); // sends value
+  Wire.endTransmission(); // end transmission
+}
+
+//writes unsigned 16 bit val to consecutive registers starting with reg
+void Adafruit_SI1145::write16(uint8_t reg, uint16_t val) {
+  
+  // convert the 16 bit value into a 2 byte array
+  union {
+    uint16_t newval;
+    char valarray[];
+  };
+  newval = val;
+  
+  Wire.beginTransmission(_addr); // start transmission to device 
+  Wire.write(reg); // sends register address to write
+  Wire.write(valarray, 2); // sends 16 bit value
   Wire.endTransmission(); // end transmission
 }
