@@ -14,6 +14,8 @@
   Written by Limor Fried/Ladyada for Adafruit Industries.  
   BSD license, all text above must be included in any redistribution
  ****************************************************/
+#ifndef _SI1145_H_
+#define _SI1145_H_
 
 
 #if (ARDUINO >= 100)
@@ -166,4 +168,4 @@ class Adafruit_SI1145  {
 
   uint8_t _addr;
 };
-
+#endif
