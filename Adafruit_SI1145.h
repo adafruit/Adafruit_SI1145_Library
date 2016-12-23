@@ -1,17 +1,17 @@
-/*************************************************** 
+/***************************************************
   This is a library for the Si1145 UV/IR/Visible Light Sensor
 
   Designed specifically to work with the Si1145 sensor in the
   adafruit shop
   ----> https://www.adafruit.com/products/1777
 
-  These sensors use I2C to communicate, 2 pins are required to  
+  These sensors use I2C to communicate, 2 pins are required to
   interface
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
   products from Adafruit!
 
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
+  Written by Limor Fried/Ladyada for Adafruit Industries.
   BSD license, all text above must be included in any redistribution
  ****************************************************/
 #ifndef _SI1145_H_
@@ -152,6 +152,7 @@ class Adafruit_SI1145  {
  public:
   Adafruit_SI1145(void);
   boolean begin();
+  boolean begin( uint8_t addr );
   void reset();
 
   uint16_t readUV();
@@ -167,5 +168,6 @@ class Adafruit_SI1145  {
   uint8_t writeParam(uint8_t p, uint8_t v);
 
   uint8_t _addr;
+  boolean _reset;
 };
 #endif
