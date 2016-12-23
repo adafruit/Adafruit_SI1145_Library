@@ -116,7 +116,12 @@ uint16_t Adafruit_SI1145::readUV(void) {
 
 // returns visible+IR light levels
 uint16_t Adafruit_SI1145::readVisible(void) {
- return read16(0x22); 
+ uint16_t val = 0;
+
+ val = read8(SI1145_REG_ALSVISDATA0);
+ val |= read8(SI1145_REG_ALSVISDATA1) << 8;
+
+ return val;
 }
 
 // returns IR light levels
