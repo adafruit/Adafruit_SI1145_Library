@@ -150,6 +150,14 @@ uint16_t Adafruit_SI1145::readProx(void) {
   return read16(SI1145_REG_PS1DATA0);
 }
 
+uint16_t Adafruit_SI1145::readPS2() {
+  return read16(SI1145_REG_PS2DATA0);
+}
+
+uint16_t Adafruit_SI1145::readPS3() {
+  return read16(SI1145_REG_PS3DATA0);
+}
+
 /*********************************************************************/
 
 uint8_t Adafruit_SI1145::writeParam(uint8_t p, uint8_t v) {

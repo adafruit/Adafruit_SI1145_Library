@@ -165,6 +165,8 @@ class Adafruit_SI1145  {
   uint16_t readIR();
   uint16_t readVisible();
   uint16_t readProx();
+  uint16_t readPS2();
+  uint16_t readPS3();
 
  private:
   uint8_t _lastError = 0;
