@@ -43,7 +43,7 @@ boolean Adafruit_SI1145::begin(void) {
   // enable sensors: uv, ir, vis, ps1 (channel0), ps2 (channel1)
   writeParam(SI1145_PARAM_CHLIST, SI1145_PARAM_CHLIST_ENUV |
   SI1145_PARAM_CHLIST_ENALSIR | SI1145_PARAM_CHLIST_ENALSVIS |
-  SI1145_PARAM_CHLIST_ENPS1 | SI1145_PARAM_CHLIST_ENPS2);
+  SI1145_PARAM_CHLIST_ENPS1 | SI1145_PARAM_CHLIST_ENPS2 | SI1145_PARAM_CHLIST_ENPS3);
 
   // enable interrupt on every sample
   write8(SI1145_REG_INTCFG, SI1145_REG_INTCFG_INTOE);  
@@ -63,8 +63,11 @@ boolean Adafruit_SI1145::begin(void) {
   writeParam(SI1145_PARAM_PSADCMISC, SI1145_PARAM_PSADCMISC_RANGE|
     SI1145_PARAM_PSADCMISC_PSMODE);
 
-  /****************************** PS2 - temperature */
-  writeParam(SI1145_PARAM_PS1ADCMUX, SI1145_PARAM_ADCMUX_GND);
+  /****************************** PS2 - reference for measurement */
+  writeParam(SI1145_PARAM_PS2ADCMUX, SI1145_PARAM_ADCMUX_NO_PHOTODIODE);
+
+  /****************************** PS3 - temperature */
+  writeParam(SI1145_PARAM_PS3ADCMUX, SI1145_PARAM_ADCMUX_TEMPERATURE);
 
   /****************************** IR */
   writeParam(SI1145_PARAM_ALSIRADCMUX, SI1145_PARAM_ADCMUX_SMALLIR);
@@ -73,7 +76,7 @@ boolean Adafruit_SI1145::begin(void) {
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSIRADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode
-  writeParam(SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE_LOW);
+  writeParam(SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE_HIGH);
 
 
   /****************************** Visible */
@@ -82,7 +85,7 @@ boolean Adafruit_SI1145::begin(void) {
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSVISADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode (not normal signal)
-  writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE_LOW);
+  writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH);
 
   /************************/
 
