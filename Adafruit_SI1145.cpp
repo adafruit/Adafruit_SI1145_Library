@@ -40,10 +40,10 @@ boolean Adafruit_SI1145::begin(void) {
   write8(SI1145_REG_UCOEFF2, 0x02);
   write8(SI1145_REG_UCOEFF3, 0x00);
 
-  // enable sensors: uv, ir, vis, ps1 (channel0)
+  // enable sensors: uv, ir, vis, ps1 (channel0), ps2 (channel1)
   writeParam(SI1145_PARAM_CHLIST, SI1145_PARAM_CHLIST_ENUV |
   SI1145_PARAM_CHLIST_ENALSIR | SI1145_PARAM_CHLIST_ENALSVIS |
-  SI1145_PARAM_CHLIST_ENPS1);
+  SI1145_PARAM_CHLIST_ENPS1 | SI1145_PARAM_CHLIST_ENPS2);
 
   // enable interrupt on every sample
   write8(SI1145_REG_INTCFG, SI1145_REG_INTCFG_INTOE);  
@@ -56,30 +56,33 @@ boolean Adafruit_SI1145::begin(void) {
   // prox sensor #1 uses LED #1
   writeParam(SI1145_PARAM_PSLED12SEL, SI1145_PARAM_PSLED12SEL_PS1LED1);
   // fastest clocks, clock div 1
-  writeParam(SI1145_PARAM_PSADCGAIN, 0);
+  writeParam(SI1145_PARAM_PSADCGAIN, SI114X_ADC_GAIN_DIV1);
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_PSADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in prox mode, high range
   writeParam(SI1145_PARAM_PSADCMISC, SI1145_PARAM_PSADCMISC_RANGE|
     SI1145_PARAM_PSADCMISC_PSMODE);
 
+  /****************************** PS2 - temperature */
+  writeParam(SI1145_PARAM_PS1ADCMUX, SI1145_PARAM_ADCMUX_GND);
+
   /****************************** IR */
   writeParam(SI1145_PARAM_ALSIRADCMUX, SI1145_PARAM_ADCMUX_SMALLIR);
   // fastest clocks, clock div 1
-  writeParam(SI1145_PARAM_ALSIRADCGAIN, 0);
+  writeParam(SI1145_PARAM_ALSIRADCGAIN, SI114X_ADC_GAIN_DIV1);
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSIRADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode
-  writeParam(SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE_HIGH);
+  writeParam(SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE_LOW);
 
 
   /****************************** Visible */
   // fastest clocks, clock div 1
-  writeParam(SI1145_PARAM_ALSVISADCGAIN, 0);
+  writeParam(SI1145_PARAM_ALSVISADCGAIN, SI114X_ADC_GAIN_DIV1);
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSVISADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode (not normal signal)
-  writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH);
+  writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE_LOW);
 
   /************************/
 
