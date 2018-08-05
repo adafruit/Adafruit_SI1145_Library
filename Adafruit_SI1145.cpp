@@ -70,7 +70,7 @@ boolean Adafruit_SI1145::begin(void) {
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSIRADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode
-  writeParam(SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE);
+  writeParam(SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE_HIGH);
 
 
   /****************************** Visible */
@@ -79,7 +79,7 @@ boolean Adafruit_SI1145::begin(void) {
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSVISADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode (not normal signal)
-  writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE);
+  writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH);
 
   /************************/
 
