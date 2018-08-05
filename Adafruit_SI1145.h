@@ -152,7 +152,12 @@ class Adafruit_SI1145  {
  public:
   Adafruit_SI1145(void);
   boolean begin();
-  void reset();
+  uint8_t reset();
+  uint8_t getLastError();
+
+  uint8_t readPartId();
+  uint8_t readRevId();
+  uint8_t readSeqId();
 
   uint16_t readUV();
   uint16_t readIR();
@@ -160,6 +165,8 @@ class Adafruit_SI1145  {
   uint16_t readProx();
 
  private:
+  uint8_t _lastError = 0;
+
   uint16_t read16(uint8_t addr);
   uint8_t read8(uint8_t addr);
   void write8(uint8_t reg, uint8_t val);
