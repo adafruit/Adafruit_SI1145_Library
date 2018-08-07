@@ -91,6 +91,8 @@
 #define SI1145_PARAM_ALSIRADCMISC_RANGE_LOW 0x00
 #define SI1145_PARAM_ALSIRADCMISC_RANGE_HIGH 0x20
 
+#define SI1145_PARAM_ADC_OFFSET 0x1A
+
 //Recovery period the  ADC takes before making a PS measurement
 #define SI1145_PARAM_ADCCOUNTER_1CLK 0x00
 #define SI1145_PARAM_ADCCOUNTER_7CLK 0x10
@@ -189,8 +191,13 @@ class Adafruit_SI1145  {
   uint16_t readPS2();
   uint16_t readPS3();
 
- private:
+  uint16_t getADCOffset() const;
+
+private:
   uint8_t _lastError = 0;
+  uint16_t ADCOffset;
+
+  uint16_t uncompress8bto16b(uint8_t x);
 
   uint16_t read16(uint8_t addr);
   uint8_t read8(uint8_t addr);

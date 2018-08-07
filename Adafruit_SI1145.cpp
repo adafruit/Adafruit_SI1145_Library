@@ -20,6 +20,7 @@
 Adafruit_SI1145::Adafruit_SI1145() {
   _lastError = 0;
   _addr = SI1145_ADDR;
+  ADCOffset = 0;
 }
 
 
@@ -72,7 +73,7 @@ boolean Adafruit_SI1145::begin(void) {
   /****************************** IR */
   writeParam(SI1145_PARAM_ALSIRADCMUX, SI1145_PARAM_ADCMUX_SMALLIR);
   // fastest clocks, clock div 1
-  writeParam(SI1145_PARAM_ALSIRADCGAIN, SI114X_ADC_GAIN_DIV1);
+  writeParam(SI1145_PARAM_ALSIRADCGAIN, SI114X_ADC_GAIN_DIV32);
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSIRADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode
@@ -81,11 +82,14 @@ boolean Adafruit_SI1145::begin(void) {
 
   /****************************** Visible */
   // fastest clocks, clock div 1
-  writeParam(SI1145_PARAM_ALSVISADCGAIN, SI114X_ADC_GAIN_DIV1);
+  writeParam(SI1145_PARAM_ALSVISADCGAIN, SI114X_ADC_GAIN_DIV32);
   // take 511 clocks to measure
   writeParam(SI1145_PARAM_ALSVISADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode (not normal signal)
   writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH);
+
+  /****************************** Read ADC negative offset */
+  ADCOffset = uncompress8bto16b(readParam(SI1145_PARAM_ADC_OFFSET));
 
   /************************/
 
@@ -134,6 +138,22 @@ uint8_t Adafruit_SI1145::readSeqId() {
   return read8(SI1145_REG_SEQID);
 }
 
+/* Expand 8 bit compressed value to 16 bit, see Silabs AN498 */
+uint16_t Adafruit_SI1145::uncompress8bto16b(uint8_t x) {
+  uint16_t result = 0;
+  uint8_t exponent = 0;
+
+  if (x < 8)
+    return 0;
+
+  exponent = (x & 0xf0) >> 4;
+  result = 0x10 | (x & 0x0f);
+
+  if (exponent >= 4)
+    return result << (exponent - 4);
+  return result >> (4 - exponent);
+}
+
 //////////////////////////////////////////////////////
 
 // returns the UV index * 100 (divide by 100 to get the index)
@@ -162,6 +182,10 @@ uint16_t Adafruit_SI1145::readPS2() {
 
 uint16_t Adafruit_SI1145::readPS3() {
   return read16(SI1145_REG_PS3DATA0);
+}
+
+uint16_t Adafruit_SI1145::getADCOffset() const {
+  return ADCOffset;
 }
 
 /*********************************************************************/
