@@ -214,6 +214,38 @@ uint16_t Adafruit_SI1145::getADCOffset() const {
   return ADCOffset;
 }
 
+uint8_t Adafruit_SI1145::ExecuteCommand(uint8_t command) {
+  write8(SI1145_REG_COMMAND, SI1145_NOP);
+  // check permanent error
+  uint8_t err = read8(SI1145_REG_RESPONSE);
+  if(err)
+    return err;
+
+  uint8_t iResp = 0x00;
+  write8(SI1145_REG_COMMAND, command);
+
+  uint32_t tmr = millis();
+  while (iResp == 0x00) {
+    iResp = read8(SI1145_REG_RESPONSE);
+
+    // 25ms timeout from datasheet
+    if (tmr + 25 < millis())
+      return 0xFF;
+  }
+
+  if ((iResp & 0xF0) == 0)
+    return 0;
+  else {
+    // clear the error
+    write8(SI1145_REG_COMMAND, SI1145_NOP);
+    return iResp; // return error code
+  }
+}
+
+uint8_t Adafruit_SI1145::takeForcedMeasurement() {
+  return ExecuteCommand(SI1145_PSALS_FORCE);
+}
+
 /*********************************************************************/
 
 uint8_t Adafruit_SI1145::writeParam(uint8_t p, uint8_t v) {

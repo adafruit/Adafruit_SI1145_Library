@@ -194,6 +194,9 @@ class Adafruit_SI1145  {
   uint16_t readPS2();
   uint16_t readPS3();
 
+  uint8_t ExecuteCommand(uint8_t command);
+  uint8_t takeForcedMeasurement();
+
   uint8_t readVisibleGain();
   void setVisibleGain(bool highRange, uint8_t gain);
   uint8_t readIRGain();
