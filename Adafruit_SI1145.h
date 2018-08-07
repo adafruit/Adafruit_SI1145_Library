@@ -197,10 +197,11 @@ class Adafruit_SI1145  {
   uint8_t ExecuteCommand(uint8_t command);
   uint8_t takeForcedMeasurement();
 
-  uint8_t readVisibleGain();
-  void setVisibleGain(bool highRange, uint8_t gain);
-  uint8_t readIRGain();
-  void setIRGain(bool highRange, uint8_t gain);
+  float calcGain(uint16_t gain);
+  uint16_t readVisibleGain();
+  void setVisibleGain(uint16_t gain);
+  uint16_t readIRGain();
+  void setIRGain(uint16_t gain);
 
   uint16_t getADCOffset() const;
 

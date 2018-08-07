@@ -192,22 +192,26 @@ uint16_t Adafruit_SI1145::readPS3() {
   return read16(SI1145_REG_PS3DATA0);
 }
 
-uint8_t Adafruit_SI1145::readVisibleGain() {
-  return readParam(SI1145_PARAM_ALSVISADCGAIN);
+float Adafruit_SI1145::calcGain(uint16_t gain) {
+  return ((gain & 0x00FF) << 2) * ((gain & 0xFF00)?14.2:1.);
+}
+
+uint16_t Adafruit_SI1145::readVisibleGain() {
+  return readParam(SI1145_PARAM_ALSVISADCGAIN) + readParam(SI1145_PARAM_ALSVISADCMISC)?0x8000:0x0000;
 }
  // adjust the visible gain
-void Adafruit_SI1145::setVisibleGain(bool highRange, uint8_t gain) {
+void Adafruit_SI1145::setVisibleGain(uint16_t gain) {
   writeParam(SI1145_PARAM_ALSVISADCGAIN, (gain & 0x07));
-  writeParam(SI1145_PARAM_ALSVISADCMISC, highRange?SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH:SI1145_PARAM_ALSVISADCMISC_VISRANGE_LOW);
+  writeParam(SI1145_PARAM_ALSVISADCMISC, (gain & 0xFF00)?SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH:SI1145_PARAM_ALSVISADCMISC_VISRANGE_LOW);
 }
  // returns the IR gain
-uint8_t Adafruit_SI1145::readIRGain() {
-  return readParam(SI1145_PARAM_ALSIRADCGAIN);
+uint16_t Adafruit_SI1145::readIRGain() {
+  return readParam(SI1145_PARAM_ALSIRADCGAIN) + readParam(SI1145_PARAM_ALSIRADCMISC)?0x8000:0x0000;
 }
  // adjust the IR gain
-void Adafruit_SI1145::setIRGain(bool highRange, uint8_t gain) {
+void Adafruit_SI1145::setIRGain(uint16_t gain) {
  writeParam(SI1145_PARAM_ALSIRADCGAIN, (gain & 0x07));
- writeParam(SI1145_PARAM_ALSIRADCMISC, highRange?SI1145_PARAM_ALSIRADCMISC_RANGE_HIGH:SI1145_PARAM_ALSIRADCMISC_RANGE_LOW);
+ writeParam(SI1145_PARAM_ALSIRADCMISC, (gain & 0xFF00)?SI1145_PARAM_ALSIRADCMISC_RANGE_HIGH:SI1145_PARAM_ALSIRADCMISC_RANGE_LOW);
 }
 
 uint16_t Adafruit_SI1145::getADCOffset() const {
