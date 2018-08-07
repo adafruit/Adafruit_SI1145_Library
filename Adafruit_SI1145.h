@@ -113,12 +113,14 @@
 #define SI1145_PARAM_ADCMUX_VDD           0x75
 
 //ADC GAIN DIV
-#define SI114X_ADC_GAIN_DIV1 0X00
-#define SI114X_ADC_GAIN_DIV2 0X01
-#define SI114X_ADC_GAIN_DIV4 0X02
-#define SI114X_ADC_GAIN_DIV8 0X03
-#define SI114X_ADC_GAIN_DIV16 0X04
-#define SI114X_ADC_GAIN_DIV32 0X05
+#define SI114X_ADC_GAIN_DIV1   0X00
+#define SI114X_ADC_GAIN_DIV2   0X01
+#define SI114X_ADC_GAIN_DIV4   0X02
+#define SI114X_ADC_GAIN_DIV8   0X03
+#define SI114X_ADC_GAIN_DIV16  0X04
+#define SI114X_ADC_GAIN_DIV32  0X05
+#define SI114X_ADC_GAIN_DIV64  0X06
+#define SI114X_ADC_GAIN_DIV128 0X07
 
 
 /* REGISTERS */
@@ -176,7 +178,8 @@
 class Adafruit_SI1145  {
  public:
   Adafruit_SI1145(void);
-  boolean begin();
+
+  boolean begin(bool autoMeasurements = true);
   uint8_t reset();
   uint8_t getLastError();
 
@@ -190,6 +193,11 @@ class Adafruit_SI1145  {
   uint16_t readProx();
   uint16_t readPS2();
   uint16_t readPS3();
+
+  uint8_t readVisibleGain();
+  void setVisibleGain(bool highRange, uint8_t gain);
+  uint8_t readIRGain();
+  void setIRGain(bool highRange, uint8_t gain);
 
   uint16_t getADCOffset() const;
 

@@ -16,6 +16,7 @@
  ****************************************************/
 
 #include "Adafruit_SI1145.h"
+#include "Adafruit_SI1145.h"
 
 Adafruit_SI1145::Adafruit_SI1145() {
   _lastError = 0;
@@ -24,7 +25,7 @@ Adafruit_SI1145::Adafruit_SI1145() {
 }
 
 
-boolean Adafruit_SI1145::begin(void) {
+boolean Adafruit_SI1145::begin(bool autoMeasurements) {
   _lastError = 0;
   Wire.begin();
  
@@ -93,11 +94,18 @@ boolean Adafruit_SI1145::begin(void) {
 
   /************************/
 
-  // measurement rate for auto
-  write8(SI1145_REG_MEASRATE0, 0xFF); // 255 * 31.25uS = 8ms
-  
-  // auto run
-  write8(SI1145_REG_COMMAND, SI1145_PSALS_AUTO);
+  if (autoMeasurements) {
+    // measurement rate for auto
+    write8(SI1145_REG_MEASRATE0, 0xFF); // 255 * 31.25uS = 8ms
+    // auto run
+    write8(SI1145_REG_COMMAND, SI1145_PSALS_AUTO);
+  } else {
+    // measurement rate none
+    write8(SI1145_REG_MEASRATE0, 0x00);
+    write8(SI1145_REG_MEASRATE1, 0x00);
+    // stop all commands
+    write8(SI1145_REG_COMMAND, SI1145_NOP);
+  }
 
   return !_lastError;
 }
@@ -182,6 +190,24 @@ uint16_t Adafruit_SI1145::readPS2() {
 
 uint16_t Adafruit_SI1145::readPS3() {
   return read16(SI1145_REG_PS3DATA0);
+}
+
+uint8_t Adafruit_SI1145::readVisibleGain() {
+  return readParam(SI1145_PARAM_ALSVISADCGAIN);
+}
+ // adjust the visible gain
+void Adafruit_SI1145::setVisibleGain(bool highRange, uint8_t gain) {
+  writeParam(SI1145_PARAM_ALSVISADCGAIN, (gain & 0x07));
+  writeParam(SI1145_PARAM_ALSVISADCMISC, highRange?SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH:SI1145_PARAM_ALSVISADCMISC_VISRANGE_LOW);
+}
+ // returns the IR gain
+uint8_t Adafruit_SI1145::readIRGain() {
+  return readParam(SI1145_PARAM_ALSIRADCGAIN);
+}
+ // adjust the IR gain
+void Adafruit_SI1145::setIRGain(bool highRange, uint8_t gain) {
+ writeParam(SI1145_PARAM_ALSIRADCGAIN, (gain & 0x07));
+ writeParam(SI1145_PARAM_ALSIRADCMISC, highRange?SI1145_PARAM_ALSIRADCMISC_RANGE_HIGH:SI1145_PARAM_ALSIRADCMISC_RANGE_LOW);
 }
 
 uint16_t Adafruit_SI1145::getADCOffset() const {
