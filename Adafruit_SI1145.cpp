@@ -193,7 +193,7 @@ uint16_t Adafruit_SI1145::readPS3() {
 }
 
 float Adafruit_SI1145::calcGain(uint16_t gain) {
-  return ((gain & 0x00FF) << 2) * ((gain & 0xFF00)?14.2:1.);
+  return (1 << (gain & 0x0007)) / ((gain & 0xFF00)?14.5:1.);
 }
 
 uint16_t Adafruit_SI1145::readVisibleGain() {
