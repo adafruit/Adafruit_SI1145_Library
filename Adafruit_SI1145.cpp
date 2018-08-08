@@ -233,7 +233,7 @@ uint8_t Adafruit_SI1145::ExecuteCommand(uint8_t command) {
     iResp = read8(SI1145_REG_RESPONSE);
 
     // 25ms timeout from datasheet
-    if (tmr + 25 < millis())
+    if (tmr + 40 < millis())
       return 0xFF;
   }
 
