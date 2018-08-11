@@ -196,18 +196,67 @@ float Adafruit_SI1145::calcGain(uint16_t gain) {
   return (1 << (gain & 0x0007)) / ((gain & 0xFF00)?14.5:1.);
 }
 
+uint16_t Adafruit_SI1145::decGain(uint16_t g) {
+  if(g == 0x8000)
+    return 0xFFFF;
+
+  g--;
+  if (g < 0x0003) {
+    g = 0x8007;
+  }
+  return g;
+}
+
+uint16_t Adafruit_SI1145::incGain(uint16_t g) {
+  g++;
+  if ((g & 0xFF) > 0x07){
+    if (g & 0xFF00) {
+      g = 0x0003; // low + x8
+    } else {
+       g = 0xFFFF;
+    }
+  }
+  return g;
+}
+
+// calc gain from signal. signal must be measured in gain 0x8000
+uint16_t Adafruit_SI1145::calcOptimalGainFromSignal(int signal) {
+  uint16_t gain = 0x8000; // high + x1
+
+  if(signal < 0) signal = 0;
+
+  uint16_t g = gain;
+  while(true) {
+    // 60% from maximal 32767 readings
+    float margin = (32767. * 0.6) / ((float)(1 << (g & 0x0007)) * ((g & 0xFF00)?1.:14.5));
+    //DEBUG_PRINTLN(SF("gain=0x") + String(g, HEX) + SF(" margin=") + String(margin));
+    if(signal < margin)
+      gain = g;
+
+    // iterator
+    g = incGain(g);
+    if (g == 0xFFFF)
+      break;
+  }
+
+  return gain;
+}
+
 uint16_t Adafruit_SI1145::readVisibleGain() {
   return readParam(SI1145_PARAM_ALSVISADCGAIN) + readParam(SI1145_PARAM_ALSVISADCMISC)?0x8000:0x0000;
 }
+
  // adjust the visible gain
 void Adafruit_SI1145::setVisibleGain(uint16_t gain) {
   writeParam(SI1145_PARAM_ALSVISADCGAIN, (gain & 0x07));
   writeParam(SI1145_PARAM_ALSVISADCMISC, (gain & 0xFF00)?SI1145_PARAM_ALSVISADCMISC_VISRANGE_HIGH:SI1145_PARAM_ALSVISADCMISC_VISRANGE_LOW);
 }
+
  // returns the IR gain
 uint16_t Adafruit_SI1145::readIRGain() {
   return readParam(SI1145_PARAM_ALSIRADCGAIN) + readParam(SI1145_PARAM_ALSIRADCMISC)?0x8000:0x0000;
 }
+
  // adjust the IR gain
 void Adafruit_SI1145::setIRGain(uint16_t gain) {
  writeParam(SI1145_PARAM_ALSIRADCGAIN, (gain & 0x07));
@@ -244,6 +293,12 @@ uint8_t Adafruit_SI1145::ExecuteCommand(uint8_t command) {
     write8(SI1145_REG_COMMAND, SI1145_NOP);
     return iResp; // return error code
   }
+}
+
+uint8_t Adafruit_SI1145::setMeassureChannels(uint8_t channels) {
+  _lastError = 0;
+  writeParam(SI1145_PARAM_CHLIST, channels);
+  return _lastError;
 }
 
 uint8_t Adafruit_SI1145::takeForcedMeasurement() {

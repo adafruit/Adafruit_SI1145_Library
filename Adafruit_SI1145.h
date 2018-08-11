@@ -195,9 +195,13 @@ class Adafruit_SI1145  {
   uint16_t readPS3();
 
   uint8_t ExecuteCommand(uint8_t command);
+  uint8_t setMeassureChannels(uint8_t channels); // CHLIST
   uint8_t takeForcedMeasurement();
 
+  uint16_t decGain(uint16_t g);
+  uint16_t incGain(uint16_t g);
   float calcGain(uint16_t gain);
+  uint16_t calcOptimalGainFromSignal(int signal);
   uint16_t readVisibleGain();
   void setVisibleGain(uint16_t gain);
   uint16_t readIRGain();
