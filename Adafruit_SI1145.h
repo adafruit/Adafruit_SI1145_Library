@@ -187,6 +187,8 @@ class Adafruit_SI1145  {
   uint8_t readRevId();
   uint8_t readSeqId();
 
+  void readCalibrationParameters();
+
   uint16_t readUV();
   uint16_t readIR();
   uint16_t readVisible();
@@ -217,6 +219,7 @@ private:
 
   uint16_t read16(uint8_t addr);
   uint8_t read8(uint8_t addr);
+  uint8_t readBytes(uint8_t a, uint8_t size, uint8_t buffer[]);
   void write8(uint8_t reg, uint8_t val);
   uint8_t readParam(uint8_t p);
   uint8_t writeParam(uint8_t p, uint8_t v);

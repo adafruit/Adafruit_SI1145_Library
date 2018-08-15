@@ -35,12 +35,19 @@ boolean Adafruit_SI1145::begin(bool autoMeasurements) {
   reset();
   if (_lastError) return false;
 
+  // calibration
+  readCalibrationParameters();
+
   /***********************************/
   // enable UVindex measurement coefficients!
-  write8(SI1145_REG_UCOEFF0, 0x29);
-  write8(SI1145_REG_UCOEFF1, 0x89);
-  write8(SI1145_REG_UCOEFF2, 0x02);
+  write8(SI1145_REG_UCOEFF0, 0x7B);
+  write8(SI1145_REG_UCOEFF1, 0x6B);
+  write8(SI1145_REG_UCOEFF2, 0x01);
   write8(SI1145_REG_UCOEFF3, 0x00);
+//  write8(SI1145_REG_UCOEFF0, 0x29);
+//  write8(SI1145_REG_UCOEFF1, 0x89);
+//  write8(SI1145_REG_UCOEFF2, 0x02);
+//  write8(SI1145_REG_UCOEFF3, 0x00);
 
   // enable sensors: uv, ir, vis, ps1 (channel0), ps2 (channel1)
   writeParam(SI1145_PARAM_CHLIST, SI1145_PARAM_CHLIST_ENUV |
@@ -144,6 +151,27 @@ uint8_t Adafruit_SI1145::readRevId() {
 
 uint8_t Adafruit_SI1145::readSeqId() {
   return read8(SI1145_REG_SEQID);
+}
+
+void Adafruit_SI1145::readCalibrationParameters() {
+  uint8_t buffer[14] = {0};
+
+  write8(SI1145_REG_UCOEFF0, 0x7B);
+  write8(SI1145_REG_UCOEFF1, 0x6B);
+  write8(SI1145_REG_UCOEFF2, 0x01);
+  write8(SI1145_REG_UCOEFF3, 0x00);
+
+  ExecuteCommand(SI1145_GET_CAL);
+
+  if (readBytes(SI1145_REG_ALSVISDATA0, 12, buffer)) {
+    Serial1.print("error read bytes!!!");
+  };
+
+  Serial1.print("buffer:");
+  Serial1.print(buffer[0]);
+  Serial1.print(buffer[1]);
+  Serial1.println(buffer[2]);
+
 }
 
 /* Expand 8 bit compressed value to 16 bit, see Silabs AN498 */
@@ -363,6 +391,29 @@ uint16_t Adafruit_SI1145::read16(uint8_t a) {
 
   return ret;
 }
+
+uint8_t Adafruit_SI1145::readBytes(uint8_t a, uint8_t size, uint8_t buffer[]) {
+  Wire.beginTransmission(_addr); // start transmission to device
+  Wire.write(a); // sends register address to read from
+  uint8_t res = Wire.endTransmission(); // end transmission
+  // check transmission error
+  if (res) {
+    _lastError = res;
+    return _lastError;
+  }
+
+  res = Wire.requestFrom(_addr, size);// send data n-bytes read
+  if (res != size) {
+    _lastError = 100;
+    return _lastError;
+  }
+
+  for(int i = 0; i < size; i++)
+    buffer[i] = Wire.read(); // receive DATA
+
+  return 0;
+}
+
 
 void Adafruit_SI1145::write8(uint8_t reg, uint8_t val) {
 
