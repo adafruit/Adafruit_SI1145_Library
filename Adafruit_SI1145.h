@@ -175,6 +175,18 @@
 
 #define SI1145_ADDR 0x60
 
+// This structure is used to store the result of the calibration retrieval
+typedef struct
+{
+    u32     vispd_correction;
+    u32     irpd_correction;
+    u32     adcrange_ratio;
+    u32     irsize_ratio;
+    u32     ledi_ratio;
+    u8      *ucoef_p;
+} SI114X_CAL_S;
+
+
 class Adafruit_SI1145  {
  public:
   Adafruit_SI1145(void);
@@ -187,7 +199,9 @@ class Adafruit_SI1145  {
   uint8_t readRevId();
   uint8_t readSeqId();
 
-  void readCalibrationParameters();
+  bool readCalibrationParameters();
+  SI114X_CAL_S *getCalibrationParameters();
+
 
   uint16_t readUV();
   uint16_t readIR();
@@ -214,6 +228,7 @@ class Adafruit_SI1145  {
 private:
   uint8_t _lastError = 0;
   uint16_t ADCOffset;
+  SI114X_CAL_S si114x_cal = {{0}}; // calibration parameters
 
   uint16_t uncompress8bto16b(uint8_t x);
 
