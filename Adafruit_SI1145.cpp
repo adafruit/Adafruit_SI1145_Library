@@ -297,7 +297,7 @@ static s16 cal_index( u8 *buffer )
 
     // buffer[12] is the LSB, buffer[13] is the MSB
     index = ( s16 )( buffer[12] + ( (u16)( buffer[13] ) << 8 ) );
-
+Serial1.printf("indx:%d\r\n", index);
     switch( index )
     {
         case -1:
@@ -572,17 +572,28 @@ bool Adafruit_SI1145::readCalibrationParameters() {
   ExecuteCommand(SI1145_GET_CAL);
 
   if (readBytes(SI1145_REG_ALSVISDATA0, 12, buffer)) {
-    Serial1.print("error read bytes!!!");
+    Serial1.println("error cal read bytes!!!");
     return false;
   };
 
-  Serial1.print("buffer:");
-  Serial1.print(buffer[0]);
-  Serial1.print(buffer[1]);
+  ExecuteCommand(SI1145_GET_CAL_INDX);
+
+  if (readBytes(SI1145_REG_PS1DATA0, 2, &buffer[12])) {
+    Serial1.println("error cal indx read bytes!!!");
+    return false;
+  };
+
+  Serial1.println("buffer:");
+  Serial1.println(buffer[0]);
+  Serial1.println(buffer[1]);
   Serial1.println(buffer[2]);
+  Serial1.println(buffer[3]);
+  Serial1.println(buffer[11]);
+  Serial1.println(buffer[12]);
 
   s16  c_index = cal_index( buffer );
    if ( c_index != 0 && c_index != 1 ) {
+     Serial1.printf("error cal index:%d\n", c_index);
       return false;
   }
 
