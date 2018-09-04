@@ -436,7 +436,6 @@ Adafruit_SI1145::Adafruit_SI1145() {
 }
 
 bool Adafruit_SI1145::si114x_set_ucoef(SI114X_CAL_S* si114x_cal) {
-  uint8_t          temp;
   uint32_t         vc=FX20_ONE, ic=FX20_ONE, long_temp;
   struct operand_t op;
   uint8_t*         ref_ucoef = si114x_cal->ucoef_p;
@@ -476,6 +475,7 @@ bool Adafruit_SI1145::si114x_set_ucoef(SI114X_CAL_S* si114x_cal) {
   out_ucoef[2] = (long_temp & 0x00ff);
   out_ucoef[3] = (long_temp & 0xff00) >> 8;
 
+Serial1.printf("Write calibration ucoef %x-%x-%x-%x\r\n", out_ucoef[0], out_ucoef[1], out_ucoef[2], out_ucoef[3]);
   getLastError();
   write8(SI1145_REG_UCOEFF0, out_ucoef[0]);
   write8(SI1145_REG_UCOEFF1, out_ucoef[1]);
