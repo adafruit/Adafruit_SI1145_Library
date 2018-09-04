@@ -22,10 +22,6 @@
 // calibration code from Si114x_functions.c from chip manufacturer
 // *******************************************************************
 
-#define FLT_TO_FX20(x)       ((x*1048576)+.5)
-#define FX20_ONE             FLT_TO_FX20( 1.000000)
-#define FX20_BAD_VALUE       0xffffffff
-
 //                                            msb   lsb   align
 //                                            i2c   i2c   ment
 //                                            addr  addr
@@ -718,7 +714,7 @@ uint16_t Adafruit_SI1145::readPS3() {
 }
 
 float Adafruit_SI1145::calcGain(uint16_t gain) {
-  return (1 << (gain & 0x0007)) / ((gain & 0xFF00)?14.5:1.);
+  return (1 << (gain & 0x0007)) / ((gain & 0xFF00)?FX20_TO_FLT(si114x_cal.adcrange_ratio):1.);
 }
 
 uint16_t Adafruit_SI1145::decGain(uint16_t g) {
@@ -753,7 +749,7 @@ uint16_t Adafruit_SI1145::calcOptimalGainFromSignal(int signal) {
   uint16_t g = gain;
   while(true) {
     // 60% from maximal 32767 readings
-    float margin = (32767. * 0.6) / ((float)(1 << (g & 0x0007)) * ((g & 0xFF00)?1.:14.5));
+    float margin = (32767. * 0.6) / ((float)(1 << (g & 0x0007)) * ((g & 0xFF00)?1.:FX20_TO_FLT(si114x_cal.adcrange_ratio)));
     //DEBUG_PRINTLN(SF("gain=0x") + String(g, HEX) + SF(" margin=") + String(margin));
     if(signal < margin)
       gain = g;
@@ -793,7 +789,10 @@ uint16_t Adafruit_SI1145::getADCOffset() const {
 }
 
 SI114X_CAL_S *Adafruit_SI1145::getCalibrationParameters() {
-  return &si114x_cal;
+  if (si114x_cal.ucoef_p)
+    return &si114x_cal;
+  else
+    return NULL;
 }
 
 uint8_t Adafruit_SI1145::ExecuteCommand(uint8_t command) {

@@ -17,6 +17,11 @@
 #ifndef _SI1145_H_
 #define _SI1145_H_
 
+// fload FX20
+#define FLT_TO_FX20(x)       ((x*1048576)+.5)
+#define FX20_TO_FLT(x)       (x/1048576.)
+#define FX20_ONE             FLT_TO_FX20( 1.000000)
+#define FX20_BAD_VALUE       0xffffffff
 
 #if (ARDUINO >= 100)
  #include "Arduino.h"
