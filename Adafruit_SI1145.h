@@ -233,6 +233,8 @@ private:
 
   uint16_t uncompress8bto16b(uint8_t x);
 
+  bool si114x_set_ucoef(SI114X_CAL_S *si114x_cal);
+
   uint16_t read16(uint8_t addr);
   uint8_t read8(uint8_t addr);
   uint8_t readBytes(uint8_t a, uint8_t size, uint8_t buffer[]);
