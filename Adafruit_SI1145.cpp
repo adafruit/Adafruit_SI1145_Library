@@ -299,7 +299,6 @@ static int16_t find_cal_index( uint8_t *buffer )
 
   // buffer[12] is the LSB, buffer[13] is the MSB
   index = ( int16_t )( buffer[12] + ( (uint16_t)( buffer[13] ) << 8 ) );
-Serial1.printf("indx:%d\r\n", index);
   switch( index )
   {
     case -1:
@@ -315,8 +314,6 @@ Serial1.printf("indx:%d\r\n", index);
   }
 
   size = sizeof(calref)/sizeof(calref[0]);
-
-Serial1.printf("result indx:%d\r\n", index);
 
   if( index < size )
   {
@@ -475,7 +472,7 @@ bool Adafruit_SI1145::si114x_set_ucoef(SI114X_CAL_S* si114x_cal) {
   out_ucoef[2] = (long_temp & 0x00ff);
   out_ucoef[3] = (long_temp & 0xff00) >> 8;
 
-Serial1.printf("Write calibration ucoef %x-%x-%x-%x\r\n", out_ucoef[0], out_ucoef[1], out_ucoef[2], out_ucoef[3]);
+//Serial1.printf("Write calibration ucoef %x-%x-%x-%x\r\n", out_ucoef[0], out_ucoef[1], out_ucoef[2], out_ucoef[3]);
   getLastError();
   write8(SI1145_REG_UCOEFF0, out_ucoef[0]);
   write8(SI1145_REG_UCOEFF1, out_ucoef[1]);
@@ -502,18 +499,14 @@ boolean Adafruit_SI1145::begin(bool autoMeasurements) {
     delay(10);
 
     /***********************************/
-    // update calibrated UVindex measurement coefficients!
+    // update calibrated UVindex measurement coefficients
     SI114X_CAL_S *cparams = getCalibrationParameters();
     si114x_set_ucoef(cparams);
-
-    Serial1.printf("Calibr OK. [%x]\n", cparams->ucoef_p[0]);
-
   } else {
     delay(10);
-    Serial1.printf("Calibr error\n");
 
     /***********************************/
-    // enable UVindex default measurement coefficients!
+    // set default UVindex measurement coefficients
     write8(SI1145_REG_UCOEFF0, 0x29);
     write8(SI1145_REG_UCOEFF1, 0x89);
     write8(SI1145_REG_UCOEFF2, 0x02);
@@ -634,33 +627,28 @@ bool Adafruit_SI1145::readCalibrationParameters() {
 
   while(true) {
     if (ExecuteCommand(SI1145_GET_CAL)) {
-      Serial1.println("error cal command1!!!");
       break;
     };
 
     if (readBytes(SI1145_REG_ALSVISDATA0, 12, buffer)) {
-      Serial1.println("error cal read bytes!!!");
       break;
     };
 
     if (ExecuteCommand(SI1145_GET_CAL_INDX)) {
-      Serial1.println("error cal command2!!!");
       break;
     }
 
     if (readBytes(SI1145_REG_PS1DATA0, 2, &buffer[12])) {
-      Serial1.println("error cal indx read bytes!!!");
       break;
     };
 
-    Serial1.print("calibration buffer: ");
-    for(int i = 0; i < 14; i++)
-      Serial1.printf("%2x ", buffer[i]);
-    Serial1.print("\r\n");
+//    Serial1.print("calibration buffer: ");
+//    for(int i = 0; i < 14; i++)
+//      Serial1.printf("%2x ", buffer[i]);
+//    Serial1.print("\r\n");
 
     s16  c_index = find_cal_index( buffer );
      if ( c_index != 0 && c_index != 1 ) {
-       Serial1.printf("error cal index:%d\n", c_index);
        break;
     }
 
