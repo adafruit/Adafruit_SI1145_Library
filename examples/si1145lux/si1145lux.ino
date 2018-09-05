@@ -18,6 +18,9 @@
 #include <Wire.h>
 #include "Adafruit_SI1145.h"
 
+#define SDAPIN   4
+#define CLKPIN   5
+
 #define SF(x) (String(x))
 
 Adafruit_SI1145 si = Adafruit_SI1145();
@@ -73,10 +76,61 @@ bool SensorInit(){
   }
 }
 
+void i2cInit() {
+  pinMode(SDAPIN, INPUT_PULLUP);
+  pinMode(CLKPIN, INPUT_PULLUP);
+  delay(200);
+  bool isok = digitalRead(SDAPIN) && digitalRead(CLKPIN);
+  if (!isok) {
+    Serial.println(F("I2C bus recovery..."));
+    delay(500);
+    //try i2c bus recovery at 100kHz = 5uS high, 5uS low
+    pinMode(SDAPIN, OUTPUT_OPEN_DRAIN);//keeping SDA high during recovery
+    pinMode(CLKPIN, OUTPUT_OPEN_DRAIN);
+    digitalWrite(SDAPIN, HIGH);
+    digitalWrite(CLKPIN, HIGH);
+
+    for (int i = 0; i < 10; i++) { //9nth cycle acts as NACK
+      digitalWrite(CLKPIN, HIGH);
+      delayMicroseconds(5);
+      digitalWrite(CLKPIN, LOW);
+      delayMicroseconds(5);
+    }
+
+    //a STOP signal (SDA from low to high while CLK is high)
+    digitalWrite(SDAPIN, LOW);
+    delayMicroseconds(5);
+    digitalWrite(CLKPIN, HIGH);
+    delayMicroseconds(2);
+    digitalWrite(SDAPIN, HIGH);
+    delayMicroseconds(2);
+    //bus status is now : FREE
+
+    //return to power up mode
+    pinMode(SDAPIN, INPUT_PULLUP);
+    pinMode(CLKPIN, INPUT_PULLUP);
+    delay(500);
+
+    isok = digitalRead(SDAPIN) && digitalRead(CLKPIN);
+    if (!digitalRead(SDAPIN))
+      Serial.println(F("I2C bus recovery  error: SDA still LOW."));
+    if (!digitalRead(CLKPIN))
+      Serial.println(F("I2C bus recovery error: CLK still LOW."));
+
+    if (isok)
+      Serial.println(F("I2C bus recovery complete."));
+  }
+
+  Wire.pins(SDAPIN, CLKPIN);
+  Wire.begin(SDAPIN, CLKPIN);
+}
+
 void setup() {
   Serial.begin(115200);
   
   Serial.println("Adafruit SI1145 lux reading demo.");
+
+  i2cInit();
 
   if (!SensorInit())
     Serial.println("Sensor init ERROR!");
