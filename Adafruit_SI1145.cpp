@@ -502,10 +502,10 @@ boolean Adafruit_SI1145::begin(bool autoMeasurements) {
     delay(10);
 
     /***********************************/
-    // set default UVindex measurement coefficients
-    write8(SI1145_REG_UCOEFF0, 0x29);
-    write8(SI1145_REG_UCOEFF1, 0x89);
-    write8(SI1145_REG_UCOEFF2, 0x02);
+    // set default UVindex measurement coefficients according to the new datasheet
+    write8(SI1145_REG_UCOEFF0, 0x7B);
+    write8(SI1145_REG_UCOEFF1, 0x6B);
+    write8(SI1145_REG_UCOEFF2, 0x01);
     write8(SI1145_REG_UCOEFF3, 0x00);
   }
 
