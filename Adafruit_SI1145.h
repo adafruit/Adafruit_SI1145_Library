@@ -150,9 +150,27 @@
 
 class Adafruit_SI1145  {
  public:
+  enum Gain {
+   ADC_0 = 0,
+   ADC_1,
+   ADC_2,
+   ADC_3,
+   ADC_4,
+   ADC_5,
+   ADC_6,
+   ADC_7
+  };
   Adafruit_SI1145(void);
   boolean begin();
   void reset();
+
+  Gain readVisibleGain();
+  void setVisibleGain(Gain gain);
+
+  Gain readIRGain();
+  void setIRGain(Gain gain);
+
+  float calculateLux(uint16_t vis, uint16_t ir);
 
   uint16_t readUV();
   uint16_t readIR();
@@ -167,5 +185,7 @@ class Adafruit_SI1145  {
   uint8_t writeParam(uint8_t p, uint8_t v);
 
   uint8_t _addr;
+  uint16_t _vis_dark;
+  uint16_t _ir_dark;
 };
 #endif

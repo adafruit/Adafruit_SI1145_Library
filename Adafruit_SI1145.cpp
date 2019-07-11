@@ -19,6 +19,8 @@
 
 Adafruit_SI1145::Adafruit_SI1145() {
   _addr = SI1145_ADDR;
+  _vis_dark = 256; // as per Si114x manual - previously ADC_OFFSET but now fixed at 256
+  _ir_dark = 256;
 }
 
 
@@ -108,25 +110,61 @@ void Adafruit_SI1145::reset() {
 
 
 //////////////////////////////////////////////////////
+// returns the visible gain
+Adafruit_SI1145::Gain Adafruit_SI1145::readVisibleGain() {
+  return (Adafruit_SI1145::Gain) readParam(SI1145_PARAM_ALSVISADCGAIN);
+}
+
+// adjust the visible gain
+void Adafruit_SI1145::setVisibleGain(Adafruit_SI1145::Gain gain) {
+ uint8_t g = (uint8_t) gain;
+ writeParam(SI1145_PARAM_ALSVISADCGAIN, g);
+}
+
+// returns the IR gain
+Adafruit_SI1145::Gain Adafruit_SI1145::readIRGain() {
+  return (Adafruit_SI1145::Gain) readParam(SI1145_PARAM_ALSIRADCGAIN);
+}
+
+// adjust the IR gain
+void Adafruit_SI1145::setIRGain(Adafruit_SI1145::Gain gain) {
+ uint8_t g = (uint8_t) gain;
+ writeParam(SI1145_PARAM_ALSIRADCGAIN, g);
+}
 
 // returns the UV index * 100 (divide by 100 to get the index)
 uint16_t Adafruit_SI1145::readUV(void) {
  return read16(0x2C); 
 }
 
+// returns a calculated lux value as per SI144x AN523.6.
+float Adafruit_SI1145::calculateLux(uint16_t vis, uint16_t ir) {
+ uint8_t gain = readVisibleGain();
+ float lux = ((5.41f * vis) + (-0.08f * ir)) / (1 + 2 * gain);
+ return lux;
+}
+
 // returns visible+IR light levels
 uint16_t Adafruit_SI1145::readVisible(void) {
- return read16(0x22); 
+ uint16_t vis = read16(SI1145_REG_ALSVISDATA0);
+ if (vis < _vis_dark)
+  _vis_dark = vis;
+ vis -= _vis_dark;
+ return vis;
 }
 
 // returns IR light levels
 uint16_t Adafruit_SI1145::readIR(void) {
- return read16(0x24); 
+ uint16_t ir = read16(SI1145_REG_ALSIRDATA0);
+ if (ir < _ir_dark)
+  _ir_dark = ir;
+ ir -= _ir_dark;
+ return ir;
 }
 
 // returns "Proximity" - assumes an IR LED is attached to LED
 uint16_t Adafruit_SI1145::readProx(void) {
- return read16(0x26); 
+ return read16(SI1145_REG_PS1DATA0);
 }
 
 /*********************************************************************/
@@ -149,12 +187,12 @@ uint8_t Adafruit_SI1145::readParam(uint8_t p) {
 
 uint8_t  Adafruit_SI1145::read8(uint8_t reg) {
   uint16_t val;
-    Wire.beginTransmission(_addr);
-    Wire.write((uint8_t)reg);
-    Wire.endTransmission();
+  Wire.beginTransmission(_addr);
+  Wire.write((uint8_t)reg);
+  Wire.endTransmission();
 
-    Wire.requestFrom((uint8_t)_addr, (uint8_t)1);  
-    return Wire.read();
+  Wire.requestFrom((uint8_t)_addr, (uint8_t)1);
+  return Wire.read();
 }
 
 uint16_t Adafruit_SI1145::read16(uint8_t a) {
