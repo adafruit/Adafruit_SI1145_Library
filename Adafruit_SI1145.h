@@ -112,8 +112,8 @@
 #define SI1145_REG_IRQEN_PS3EVERYSAMPLE 0x10
 
 
-#define SI1145_REG_IRQMODE1 0x05
-#define SI1145_REG_IRQMODE2 0x06
+#define SI1145_REG_IRQMODE1 0x05 // not documented in data sheet
+#define SI1145_REG_IRQMODE2 0x06 // not documented in data sheet
 
 #define SI1145_REG_HWKEY  0x07
 #define SI1145_REG_MEASRATE0 0x08
@@ -153,6 +153,7 @@ class Adafruit_SI1145  {
   Adafruit_SI1145(void);
   boolean begin();
   void reset();
+  void dumpParam();
 
   uint16_t readUV();
   uint16_t readIR();
@@ -163,6 +164,7 @@ class Adafruit_SI1145  {
   uint16_t read16(uint8_t addr);
   uint8_t read8(uint8_t addr);
   void write8(uint8_t reg, uint8_t val);
+  void write16(uint8_t reg, uint16_t val);
   uint8_t readParam(uint8_t p);
   uint8_t writeParam(uint8_t p, uint8_t v);
 

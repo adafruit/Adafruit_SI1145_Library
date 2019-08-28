@@ -23,22 +23,34 @@ Adafruit_SI1145::Adafruit_SI1145() {
 
 
 boolean Adafruit_SI1145::begin(void) {
+/* (default [I2C address of SI1145=0x60], [I2C bus number])
+   intitalizes to default mode (UV,Vis,IR and Prox 1)
+   enables all interupts and starts in autonomous mode*/
+
+  // Create I2C device
   Wire.begin();
  
   uint8_t id = read8(SI1145_REG_PARTID);
   if (id != 0x45) return false; // look for SI1145
   
+#ifdef DEBUG
+  dumpParam();
+#endif
+    
   reset();
   
+#ifdef DEBUG
+  dumpParam();
+#endif
 
     /***********************************/
-  // enable UVindex measurement coefficients!
+  // write UVindex measurement coefficients! Not necessary  these are defaults
   write8(SI1145_REG_UCOEFF0, 0x29);
   write8(SI1145_REG_UCOEFF1, 0x89);
   write8(SI1145_REG_UCOEFF2, 0x02);
   write8(SI1145_REG_UCOEFF3, 0x00);
 
-  // enable UV sensor
+  // enables all sensors: UV, IR, Visible and Proximity
   writeParam(SI1145_PARAM_CHLIST, SI1145_PARAM_CHLIST_ENUV |
   SI1145_PARAM_CHLIST_ENALSIR | SI1145_PARAM_CHLIST_ENALSVIS |
   SI1145_PARAM_CHLIST_ENPS1);
@@ -53,27 +65,27 @@ boolean Adafruit_SI1145::begin(void) {
   writeParam(SI1145_PARAM_PS1ADCMUX, SI1145_PARAM_ADCMUX_LARGEIR);
   // prox sensor #1 uses LED #1
   writeParam(SI1145_PARAM_PSLED12SEL, SI1145_PARAM_PSLED12SEL_PS1LED1);
-  // fastest clocks, clock div 1
+  // fastest clocks, clock div 1 (integration time)
   writeParam(SI1145_PARAM_PSADCGAIN, 0);
-  // take 511 clocks to measure
+  // take 511 clocks to recover
   writeParam(SI1145_PARAM_PSADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in prox mode, high range
   writeParam(SI1145_PARAM_PSADCMISC, SI1145_PARAM_PSADCMISC_RANGE|
     SI1145_PARAM_PSADCMISC_PSMODE);
-
+  
+  /******************** IR Sensor ***************************/
   writeParam(SI1145_PARAM_ALSIRADCMUX, SI1145_PARAM_ADCMUX_SMALLIR);  
-  // fastest clocks, clock div 1
+  // fastest clocks, clock div 1 (integration time)
   writeParam(SI1145_PARAM_ALSIRADCGAIN, 0);
-  // take 511 clocks to measure
+  // take 511 clocks to recover
   writeParam(SI1145_PARAM_ALSIRADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode
   writeParam(SI1145_PARAM_ALSIRADCMISC, SI1145_PARAM_ALSIRADCMISC_RANGE);
 
-
-
-  // fastest clocks, clock div 1
+  /******************** Visible Sensor ***************************/
+  // fastest clocks, clock div 1 (integration time
   writeParam(SI1145_PARAM_ALSVISADCGAIN, 0);
-  // take 511 clocks to measure
+  // take 511 clocks to recover
   writeParam(SI1145_PARAM_ALSVISADCOUNTER, SI1145_PARAM_ADCCOUNTER_511CLK);
   // in high range mode (not normal signal)
   writeParam(SI1145_PARAM_ALSVISADCMISC, SI1145_PARAM_ALSVISADCMISC_VISRANGE);
@@ -82,7 +94,7 @@ boolean Adafruit_SI1145::begin(void) {
 /************************/
 
   // measurement rate for auto
-  write8(SI1145_REG_MEASRATE0, 0xFF); // 255 * 31.25uS = 8ms
+  write16(SI1145_REG_MEASRATE0, 0xFF); // 255 * 31.25uS = 8ms
   
   // auto run
   write8(SI1145_REG_COMMAND, SI1145_PSALS_AUTO);
@@ -91,11 +103,10 @@ boolean Adafruit_SI1145::begin(void) {
 }
 
 void Adafruit_SI1145::reset() {
-  write8(SI1145_REG_MEASRATE0, 0);
-  write8(SI1145_REG_MEASRATE1, 0);
+  write16(SI1145_REG_MEASRATE0, 0);
   write8(SI1145_REG_IRQEN, 0);
-  write8(SI1145_REG_IRQMODE1, 0);
-  write8(SI1145_REG_IRQMODE2, 0);
+  write8(SI1145_REG_IRQMODE1, 0); // not documented in data sheet
+  write8(SI1145_REG_IRQMODE2, 0); // not documented in data sheet
   write8(SI1145_REG_INTCFG, 0);
   write8(SI1145_REG_IRQSTAT, 0xFF);
 
@@ -106,6 +117,20 @@ void Adafruit_SI1145::reset() {
   delay(10);
 }
 
+/*****************************************/
+// dumps the parameter registers
+
+void Adafruit_SI1145::dumpParam() {
+    Serial.begin(9600);
+    for (int i=0; i < 0x20 ; i++) {
+        Serial.print("Param 0x"); Serial.print(i, HEX);
+        Serial.print(" = 0x"); Serial.println(readParam(i), HEX);
+    }
+    Serial.print("SI1145_REG_UCOEFF0 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF0), HEX);
+    Serial.print("SI1145_REG_UCOEFF1 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF1), HEX);
+    Serial.print("SI1145_REG_UCOEFF2 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF2), HEX);
+    Serial.print("SI1145_REG_UCOEFF3 = 0x"); Serial.println(read8(SI1145_REG_UCOEFF3), HEX);    
+}
 
 //////////////////////////////////////////////////////
 
@@ -131,6 +156,7 @@ uint16_t Adafruit_SI1145::readProx(void) {
 
 /*********************************************************************/
 
+// writes value to the parameter memory and verifies value is written 
 uint8_t Adafruit_SI1145::writeParam(uint8_t p, uint8_t v) {
   //Serial.print("Param 0x"); Serial.print(p, HEX);
   //Serial.print(" = 0x"); Serial.println(v, HEX);
@@ -140,6 +166,7 @@ uint8_t Adafruit_SI1145::writeParam(uint8_t p, uint8_t v) {
   return read8(SI1145_REG_PARAMRD);
 }
 
+// Reads (parameter) returns value of parameter, no decoding
 uint8_t Adafruit_SI1145::readParam(uint8_t p) {
   write8(SI1145_REG_COMMAND, p | SI1145_PARAM_QUERY);
   return read8(SI1145_REG_PARAMRD);
@@ -147,6 +174,7 @@ uint8_t Adafruit_SI1145::readParam(uint8_t p) {
 
 /*********************************************************************/
 
+// read unsign 8 bit value from register
 uint8_t  Adafruit_SI1145::read8(uint8_t reg) {
   uint16_t val;
     Wire.beginTransmission(_addr);
@@ -157,6 +185,7 @@ uint8_t  Adafruit_SI1145::read8(uint8_t reg) {
     return Wire.read();
 }
 
+// reads unsigned 16 bit value from consecutive registers starting with (register)
 uint16_t Adafruit_SI1145::read16(uint8_t a) {
   uint16_t ret;
 
@@ -171,10 +200,27 @@ uint16_t Adafruit_SI1145::read16(uint8_t a) {
   return ret;
 }
 
+//writes unsigned 8 bit val to register reg 
 void Adafruit_SI1145::write8(uint8_t reg, uint8_t val) {
 
   Wire.beginTransmission(_addr); // start transmission to device 
   Wire.write(reg); // sends register address to write
   Wire.write(val); // sends value
+  Wire.endTransmission(); // end transmission
+}
+
+//writes unsigned 16 bit val to consecutive registers starting with reg
+void Adafruit_SI1145::write16(uint8_t reg, uint16_t val) {
+  
+  // convert the 16 bit value into a 2 byte array
+  union {
+    uint16_t newval;
+    char valarray[];
+  };
+  newval = val;
+  
+  Wire.beginTransmission(_addr); // start transmission to device 
+  Wire.write(reg); // sends register address to write
+  Wire.write(valarray, 2); // sends 16 bit value
   Wire.endTransmission(); // end transmission
 }
