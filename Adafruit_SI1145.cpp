@@ -17,14 +17,18 @@
 
 #include "Adafruit_SI1145.h"
 
-Adafruit_SI1145::Adafruit_SI1145() {
-  _addr = SI1145_ADDR;
+Adafruit_SI1145::Adafruit_SI1145()
+: m_pBus(&Wire)
+, _addr(SI1145_ADDR)
+{
 }
 
 
-boolean Adafruit_SI1145::begin(void) {
-  Wire.begin();
- 
+boolean Adafruit_SI1145::begin(uint8_t addr,TwoWire* pBus) {
+
+  _addr = addr;
+  m_pBus = pBus;
+  m_pBus->begin();
   uint8_t id = read8(SI1145_REG_PARTID);
   if (id != 0x45) return false; // look for SI1145
   
@@ -148,33 +152,32 @@ uint8_t Adafruit_SI1145::readParam(uint8_t p) {
 /*********************************************************************/
 
 uint8_t  Adafruit_SI1145::read8(uint8_t reg) {
-  uint16_t val;
-    Wire.beginTransmission(_addr);
-    Wire.write((uint8_t)reg);
-    Wire.endTransmission();
+    m_pBus->beginTransmission(_addr);
+    m_pBus->write((uint8_t)reg);
+    m_pBus->endTransmission();
 
-    Wire.requestFrom((uint8_t)_addr, (uint8_t)1);  
-    return Wire.read();
+    m_pBus->requestFrom((uint8_t)_addr, (uint8_t)1);  
+    return m_pBus->read();
 }
 
 uint16_t Adafruit_SI1145::read16(uint8_t a) {
   uint16_t ret;
 
-  Wire.beginTransmission(_addr); // start transmission to device 
-  Wire.write(a); // sends register address to read from
-  Wire.endTransmission(); // end transmission
+  m_pBus->beginTransmission(_addr); // start transmission to device 
+  m_pBus->write(a); // sends register address to read from
+  m_pBus->endTransmission(); // end transmission
   
-  Wire.requestFrom(_addr, (uint8_t)2);// send data n-bytes read
-  ret = Wire.read(); // receive DATA
-  ret |= (uint16_t)Wire.read() << 8; // receive DATA
+  m_pBus->requestFrom(_addr, (uint8_t)2);// send data n-bytes read
+  ret = m_pBus->read(); // receive DATA
+  ret |= (uint16_t)m_pBus->read() << 8; // receive DATA
 
   return ret;
 }
 
 void Adafruit_SI1145::write8(uint8_t reg, uint8_t val) {
 
-  Wire.beginTransmission(_addr); // start transmission to device 
-  Wire.write(reg); // sends register address to write
-  Wire.write(val); // sends value
-  Wire.endTransmission(); // end transmission
+  m_pBus->beginTransmission(_addr); // start transmission to device 
+  m_pBus->write(reg); // sends register address to write
+  m_pBus->write(val); // sends value
+  m_pBus->endTransmission(); // end transmission
 }
