@@ -22,7 +22,9 @@ Adafruit_SI1145::Adafruit_SI1145()
 , _addr(SI1145_ADDR)
 {
 }
-
+boolean Adafruit_SI1145::begin(TwoWire* pBus){
+  return begin(SI1145_ADDR,pBus);
+}
 
 boolean Adafruit_SI1145::begin(uint8_t addr,TwoWire* pBus) {
 
