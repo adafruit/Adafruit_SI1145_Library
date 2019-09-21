@@ -152,6 +152,7 @@ class Adafruit_SI1145  {
  public:
   Adafruit_SI1145(void);
   boolean begin(uint8_t addr = SI1145_ADDR,TwoWire* pBus = &Wire);
+  boolean begin(TwoWire* pBus);
   void reset();
 
   uint16_t readUV();
