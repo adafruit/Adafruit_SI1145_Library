@@ -16,11 +16,20 @@
  ****************************************************/
 
 #include "Adafruit_SI1145.h"
+
+/**
+ * @brief Destructor
+ *
+ */
+Adafruit_SI1145::~Adafruit_SI1145() {
+  if (i2c_dev)
+    delete i2c_dev;
+}
 /**
  * @brief Construct a new Adafruit_SI1145::Adafruit_SI1145 object
  *
  */
-Adafruit_SI1145::Adafruit_SI1145() : m_pBus(&Wire), _addr(SI1145_ADDR) {}
+Adafruit_SI1145::Adafruit_SI1145() {}
 /**
  * @brief Initize the driver, specifying the `TwoWire` bus to use
  *
@@ -38,10 +47,13 @@ boolean Adafruit_SI1145::begin(TwoWire *pBus) {
  * @return boolean true: success false: failure to initize the sensor
  */
 boolean Adafruit_SI1145::begin(uint8_t addr, TwoWire *pBus) {
+  if (i2c_dev)
+    delete i2c_dev;
+  i2c_dev = new Adafruit_I2CDevice(addr, pBus);
+  if (!i2c_dev->begin()) {
+    return false;
+  }
 
-  _addr = addr;
-  m_pBus = pBus;
-  m_pBus->begin();
   uint8_t id = read8(SI1145_REG_PARTID);
   if (id != 0x45)
     return false; // look for SI1145
@@ -174,32 +186,18 @@ uint8_t Adafruit_SI1145::readParam(uint8_t p) {
 /*********************************************************************/
 
 uint8_t Adafruit_SI1145::read8(uint8_t reg) {
-  m_pBus->beginTransmission(_addr);
-  m_pBus->write((uint8_t)reg);
-  m_pBus->endTransmission();
-
-  m_pBus->requestFrom((uint8_t)_addr, (uint8_t)1);
-  return m_pBus->read();
+  uint8_t buffer[1] = {reg};
+  i2c_dev->write_then_read(buffer, 1, buffer, 1);
+  return buffer[0];
 }
 
 uint16_t Adafruit_SI1145::read16(uint8_t a) {
-  uint16_t ret;
-
-  m_pBus->beginTransmission(_addr); // start transmission to device
-  m_pBus->write(a);                 // sends register address to read from
-  m_pBus->endTransmission();        // end transmission
-
-  m_pBus->requestFrom(_addr, (uint8_t)2); // send data n-bytes read
-  ret = m_pBus->read();                   // receive DATA
-  ret |= (uint16_t)m_pBus->read() << 8;   // receive DATA
-
-  return ret;
+  uint8_t buffer[2] = {a, 0};
+  i2c_dev->write_then_read(buffer, 1, buffer, 2);
+  return ((uint16_t)buffer[0]) | ((uint16_t)buffer[1] << 8);
 }
 
 void Adafruit_SI1145::write8(uint8_t reg, uint8_t val) {
-
-  m_pBus->beginTransmission(_addr); // start transmission to device
-  m_pBus->write(reg);               // sends register address to write
-  m_pBus->write(val);               // sends value
-  m_pBus->endTransmission();        // end transmission
+  uint8_t buffer[2] = {reg, val};
+  i2c_dev->write(buffer, 2);
 }
