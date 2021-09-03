@@ -22,7 +22,7 @@
 #else
 #include "WProgram.h"
 #endif
-#include <Wire.h>
+#include <Adafruit_I2CDevice.h>
 
 /* COMMANDS */
 #define SI1145_PARAM_QUERY 0x80
@@ -150,6 +150,7 @@
 class Adafruit_SI1145 {
 public:
   Adafruit_SI1145(void);
+  ~Adafruit_SI1145();
   boolean begin(uint8_t addr = SI1145_ADDR, TwoWire *pBus = &Wire);
   boolean begin(TwoWire *pBus);
   void reset();
@@ -165,7 +166,6 @@ private:
   void write8(uint8_t reg, uint8_t val);
   uint8_t readParam(uint8_t p);
   uint8_t writeParam(uint8_t p, uint8_t v);
-  TwoWire *m_pBus;
-  uint8_t _addr;
+  Adafruit_I2CDevice *i2c_dev = NULL; ///< Pointer to I2C bus interface
 };
 #endif
