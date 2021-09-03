@@ -1,8 +1,8 @@
 var indexSectionsWithContent =
 {
-  0: "abr",
+  0: "abr~",
   1: "a",
-  2: "abr"
+  2: "abr~"
 };
 
 var indexSectionNames =
